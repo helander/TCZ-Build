@@ -1,0 +1,208 @@
+DESCRIPTION="Set/show RT priorities"
+PACKAGE="rtirq"
+VERSION="0.1"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG=""
+AUTHOR="Lars-Erik Helander"
+SITE=""
+COPYING="GPL"
+
+tcbuild_download()
+{
+  echo "No download defined."
+}
+
+tcbuild_unpack()
+{
+  echo "No unpack defined."
+}
+
+tcbuild_configure()
+{
+ echo "No configure defined."
+}
+
+tcbuild_compile()
+{
+ echo "No compile defined."
+}
+
+tcbuild_install()
+{
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+#  mkdir -p "${root}/bin"
+#  sudo cp ${BIN_BASE}/busybox/root/bin/busybox ${root}/bin
+
+  mkdir -p "${root}/usr/local/bin"
+  
+  cat <<EOF >"${root}/usr/local/bin/rtps"
+#!/bin/sh
+
+ALLCMDS=\`ps -o comm\`
+PLIST=""
+for c in \$ALLCMDS ; do
+  PIDS=\`pidof \$c\`
+  for p in \$PIDS ; do
+    POLICY=\`busybox chrt -p \$p | awk '/policy:/ {print \$6}'\`
+    PRIO=\`busybox chrt -p \$p | awk '/priority:/ {print \$6}'\`
+    if [ "\$PRIO" != "0" ] ; then
+      PLIST="\$PLIST \$PRIO#\$POLICY#\$c#\$p"
+    fi
+  done
+done   
+PLIST=\`echo \$PLIST | tr " " "\n" | sort -nr\`
+for l in \$PLIST ; do
+      echo \$l | awk -F# '{printf "%5s%13s  %-20s%8s\n",\$1,\$2,\$3,\$4}'
+done
+EOF
+   chmod a+x ${root}/usr/local/bin/rtps
+
+   mkdir -p "${root}/usr/local/tce.installed"
+   cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+/usr/local/bin/rtirqset
+EOF
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+  cat <<EOF >"${root}/usr/local/bin/rtirqset"
+#!/bin/sh
+# ANSI COLORS
+CRE="\$(echo -e '\r\033[K')"
+NORMAL="\$(echo -e '\033[0;39m')"
+RED="\$(echo -e '\033[1;31m')"
+GREEN="\$(echo -e '\033[1;32m')"
+YELLOW="\$(echo -e '\033[1;33m')"
+BLUE="\$(echo -e '\033[1;34m')"
+MAGENTA="\$(echo -e '\033[1;35m')"
+CYAN="\$(echo -e '\033[1;36m')"
+WHITE="\$(echo -e '\033[1;37m')"
+
+RTIRQ_CHRT="/bin/busybox chrt"
+
+# IRQ thread service names
+# (space separated list, from higher to lower priority).
+RTIRQ_NAME_LIST="rtc snd usb i8042"
+
+# Highest priority.
+RTIRQ_PRIO_HIGH=90
+
+# Priority decrease step.
+RTIRQ_PRIO_DECR=5
+
+# On kernel configurations that support it,
+# which services should be NOT threaded 
+# (space separated list).
+RTIRQ_NON_THREADED="rtc snd"
+
+
+
+# Colon delimited trail list of already assigned IRQ numbers,
+# preventind lower priority override due to shared IRQs.
+RTIRQ_TRAIL=":"
+
+
+#
+# IRQ thread handler policy prioritizer, by IRQ number.
+#
+rtirq_exec_num()
+{
+  NAME1=\$1
+  NAME2=\$2
+  PRI2=\$3
+  IRQ=\$4
+  # Check the services that are to be (un)threaded.
+  if [ -n "\`echo :\${RTIRQ_NON_THREADED}: | sed 's/ /:/g' | grep :\${NAME1}:\`" ]
+  then
+    PREPEND="Setting IRQ priorities:  [\${NAME2}] irq=\${IRQ}"
+    for THREADED in /proc/irq/\${IRQ}/*/threaded
+    do
+      if [ -f "\${THREADED}" ]
+      then
+        echo "\${PREPEND}: \${THREADED}: OFF."
+        echo -n 0 > "\${THREADED}"			
+      fi
+    done
+  fi
+  # And now do the proper threading prioritization...
+  if [ -z "\`echo \${RTIRQ_TRAIL} | grep :\${IRQ}:\`" ]
+  then 
+  PIDS=\`ps -eo pid,comm | egrep "irq.\${IRQ}.[a-z0-9]*\\$" | awk '{print \$1}'\`
+  for PID in \${PIDS}
+  do
+    PREPEND="Setting IRQ priorities:  [\${NAME2}] irq=\${IRQ} pid=\${PID}"
+    PREPEND="\${PREPEND} prio=\${PRI2}"
+    if \${RTIRQ_CHRT} -p -f \${PRI2} \${PID} > /dev/null 2>&1
+    then
+      echo "\${YELLOW}\${PREPEND}: \${GREEN}OK\${NORMAL}"
+    else 
+      echo "\${YELLOW}\${PREPEND}: \${RED}FAILED\${NORMAL}"
+    fi
+    PRI2=\$((\${PRI2} - 1))
+    done
+    RTIRQ_TRAIL=":\${IRQ}\${RTIRQ_TRAIL}"
+  fi
+}
+
+#
+# IRQ thread handler policy prioritizer, by service name.
+#
+rtirq_exec_name()
+{
+  NAME1=\$1
+  NAME2=\$2
+  PRI1=\$3
+  IRQS=\`grep "\${NAME2}" /proc/interrupts | awk -F: '{print \$1}'\`
+  for IRQ in \${IRQS}
+  do
+    rtirq_exec_num \${NAME1} \${NAME2} \${PRI1} \${IRQ}
+    PRI1=\$((\${PRI1} - 1))
+  done
+}
+
+#
+# Generic process top prioritizer
+#
+
+#
+# Main executive.
+#
+# Check configured base priority.
+PRI0=\${RTIRQ_PRIO_HIGH:-90}
+[ \$((\${PRI0})) -gt 95 ] && PRI0=95
+[ \$((\${PRI0})) -lt 55 ] && PRI0=55
+# Check configured priority decrease step.
+DECR=\${RTIRQ_PRIO_DECR:-5}
+[ \$((\${DECR})) -gt 10 ] && DECR=10
+[ \$((\${DECR})) -lt  1 ] && DECR=1
+# Process all configured service names...
+for NAME in \${RTIRQ_NAME_LIST}
+do
+    case \${NAME} in
+      snd)
+	PRI1=\${PRI0}
+#	IRQS=\`grep irq /proc/asound/cards | tac | sed 's/.* irq \(.*\)/\1/'\`
+	IRQS=\`grep irq /proc/asound/cards | sed 's/.* irq \(.*\)/\1/'\`
+	for IRQ in \${IRQS}
+	do
+	  rtirq_exec_num \${NAME} \${NAME} \${PRI1} \${IRQ}
+	  PRI1=\$((\${PRI1} - 1))
+	done
+	  ;;
+      usb)
+	rtirq_exec_name  \${NAME} "ohci_hcd" \${PRI0}
+	rtirq_exec_name  \${NAME} "uhci_hcd" \${PRI0}
+	rtirq_exec_name  \${NAME} "ehci_hcd" \${PRI0}
+	;;
+      *)
+	rtirq_exec_name  \${NAME} \${NAME} \${PRI0}
+	;;  
+    esac
+    [ \${PRI0} -gt \${DECR} ] && PRI0=\$((\${PRI0} - \${DECR}))
+done
+EOF
+
+   chmod a+x ${root}/usr/local/bin/rtirqset
+
+}

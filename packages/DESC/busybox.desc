@@ -1,0 +1,61 @@
+PACKAGE="busybox"
+VERSION="1.13.4"
+DOWNLOAD_PATH="http://busybox.net/downloads"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION=""
+SITE="http://busybox.net/"
+COPYING=""
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/16 Initial Version"
+#FIXES="df ls udhcpd"
+
+conditional_download()
+{
+  dpath="$1"
+  dfile="$2"
+  [ -f "${dfile}" ] || wget ${dpath}/${dfile}
+}
+
+tcbuild_download()
+{
+  mkdir -p "${DOWNLOADS_DIR}"
+  cd "${DOWNLOADS_DIR}"
+  conditional_download $DOWNLOAD_PATH $PACKAGE-$VERSION.tgz
+  for f in $FIXES ; do
+    conditional_download $DOWNLOAD_PATH/fixes-$VERSION $PACKAGE-$VERSION-$f.patch 
+  done
+#  conditional_download http://distro.ibiblio.org/pub/linux/distributions/tinycorelinux/release/src busybox-1.13.3_tc.config
+}
+
+tcbuild_unpack()
+{
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  tar zxvf ${DOWNLOADS_DIR}/$PACKAGE-$VERSION.tgz
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  for f in $FIXES ; do
+    patch -p1  < ${DOWNLOADS_DIR}/$PACKAGE-$VERSION-$f.patch
+  done
+#  [ -f "${DOWNLOADS_DIR}/busybox-1.13.3_tc.config" ] || cp ${DOWNLOADS_DIR}/busybox-1.13.3_tc.config .config
+}
+
+tcbuild_configure()
+{
+   cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+#   busybox bbconfig > .config
+   make oldconfig
+   make menuconfig
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  sudo rm -fr ${BIN_BASE}/${PACKAGE}/root/*
+  make CONFIG_PREFIX="${BIN_BASE}/${PACKAGE}/root" install
+  cd ${BIN_BASE}/${PACKAGE}/root
+  sudo chown -R root *
+  sudo chgrp -R root *
+}
+

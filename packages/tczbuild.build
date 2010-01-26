@@ -1,0 +1,140 @@
+#!/bin/sh
+HERE=`pwd`
+
+PACKAGE="tczbuild"
+
+# CLEAN
+##sudo rm -fr root/*
+mkdir -p root/usr/local
+mkdir -p root/usr/local/tce.installed
+mkdir -p root/usr/local/bin
+mkdir -p root/usr/local/share/$PACKAGE
+
+# POPULATE
+
+
+# INIT SCRIPT
+script="root/usr/local/tce.installed/$PACKAGE"
+cat <<EOF >$script
+#!/bin/sh
+. /etc/init.d/tc-functions
+LOCAL="\$(autoscan 'LOCAL' 'd')"/LOCAL
+if [ "\$LOCAL" != "/LOCAL" ]; then
+   LOCAL_DEVICE="\${LOCAL%%/*}"
+   LOCAL_DIR="\${LOCAL#*/}"
+   find_mountpoint "\$LOCAL_DEVICE"
+   if [ -n "\$MOUNTPOINT" ]; then
+     [ "\$MOUNTED" == "yes" ] || mount "\$MOUNTPOINT"
+     mkdir /local
+     mount --bind \$MOUNTPOINT/LOCAL /local
+   fi
+fi
+EOF
+
+sudo chown root:staff $script
+sudo chmod 775 $script
+
+# mktcz SCRIPT
+script="root/usr/local/bin/mktcz"
+cat <<EOF >$script
+#!/bin/sh
+package=\$1
+sourcedir=\$2
+destdir=\$3
+
+if [ -z "\$destdir" ]; then
+  echo "Usage: mktcz package source dest"
+  echo "   package: package name (without .tcz)"
+  echo "   source:  directory that holds package content"
+  echo "   package: directory where result will be placed"
+  exit
+fi
+
+PKGFILE=\$destdir/\$package.tcz
+
+
+cd \$sourcedir
+find ! -type d > \$PKGFILE.list
+rm -f \$PKGFILE
+mksquashfs . \$PKGFILE
+md5sum \$PKGFILE | sed 's@/.*/@@' > "\$PKGFILE.md5.txt"
+EOF
+sudo chown root:staff $script
+sudo chmod 775 $script
+
+# mktczdep SCRIPT
+script="root/usr/local/bin/mktczdep"
+cat <<EOF >$script
+#!/bin/sh
+package=\$1
+sourcedir=\$2
+destdir=\$3
+
+if [ -z "\$destdir" ]; then
+  echo "Usage: mktcz package source dest"
+  echo "   package: package name (without .tcz)"
+  echo "   source:  directory that holds package content"
+  echo "   package: directory where result will be placed"
+  exit
+fi
+
+PKGFILE=\$sourcedir/\$package.tcz
+DEPFILE=\$destdir/\$package.tcz.dep
+
+
+
+listlines() { 
+  for i in \$*; do
+     echo \$i
+  done
+}
+
+
+rm -f \$DEPFILE
+
+repodir="/local/repo/tcz/"
+content=\`mktemp -t -d\`
+sudo mount \$PKGFILE \$content -t squashfs -o loop,ro,bs=4096
+files=\`find \$content\`
+
+unset filedeps
+for f in \$files; do
+  dfiles=\`ldd \$f 2>/dev/null | grep -e "=> /usr/local" -e "=> not found" | awk '{print \$1}'\`
+  [ "\$dfiles" ] && echo "\$f ==> \$dfiles"
+  [ "\$dfiles" ] && filedeps="\$filedeps \$dfiles"
+done
+fdeps=\`listlines \$filedeps | sort -u\`
+unset pkgdeps
+for f in \$fdeps; do
+ echo \$f "----->"
+ deppkgs=\`grep -l \$f \$repodir/*.tcz.list\`
+ many=""
+ for pkg in \$deppkgs; do
+   bd=\`basename \$pkg | sed "s/.tcz.list//"\`
+   if [ "\$bd" != "\$package" ]; then
+     echo "  " \$bd
+     pkgdeps="\$pkgdeps \$bd.tcz"
+   fi
+   [ -n "\$many" ] && echo "WARNING!!!!!!!!! \$pkg is found in multiple extensions !!!!!WARNING"
+   many="yes"
+ done
+done
+sudo umount \$content
+sudo rmdir \$content
+if [ "\$pkgdeps" ]; then
+  listlines \$pkgdeps | sort -u > \$DEPFILE 
+fi
+EOF
+sudo chown root:staff $script
+sudo chmod 775 $script
+
+
+
+
+# CREATE THE PACKAGE
+rm -f $PACKAGE.tcz
+(cd root;mksquashfs . ../$PACKAGE.tcz)
+
+
+
+

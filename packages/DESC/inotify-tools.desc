@@ -1,0 +1,13 @@
+PACKAGE="inotify-tools"
+VERSION="3.13"
+DOWNLOAD_PATH="http://sunet.dl.sourceforge.net/sourceforge/inotify-tools"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Inotify filesystem utilities"
+SITE="http://inotify-tools.sourceforge.net/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/20 Initial Version"
+

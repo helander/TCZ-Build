@@ -1,0 +1,53 @@
+#!/bin/sh
+HERE=`pwd`
+BUILD_DIR=/mnt/hda1/TMP/src/harmony
+PACK_DIR=/mnt/hda1/TMP/bin/harmony
+
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/lib/pkgconfig"
+
+export PATH=/mnt/hda1/JAVA/ant/bin:$PATH
+
+sudo ln -s /usr/local/include/lcms.h /usr/include
+
+# BUILD
+mkdir -p $BUILD_DIR
+rm -fr $BUILD_DIR/*
+cd $BUILD_DIR
+svn checkout http://svn.apache.org/repos/asf/harmony/enhanced/trunk
+cd trunk
+ant populate-src
+ant fetch-depends
+ant build
+
+# INSTALL
+sudo rm -fr $PACK_DIR/*
+mkdir -p $PACK_DIR/root/usr/local/harmony
+root="$PACK_DIR/root"
+cd $root
+cp -a $BUILD_DIR/trunk/target/hdk/jdk $root/usr/local/harmony
+find . | xargs file | grep "executable" | grep ELF | grep "not stripped" | cut -f 1 -d : | xargs strip --strip-unneeded 2> /dev/null
+find . | xargs file | grep "shared object" | grep ELF | grep "not stripped" | cut -f 1 -d : | xargs strip -g 2> /dev/null
+
+
+# START SCRIPT
+mkdir -p "${root}/usr/local/tce.installed"
+cat <<EOF >"${root}/usr/local/tce.installed/harmony"
+#!/bin/sh
+echo "export PATH=/usr/local/harmony/jdk/bin:\$PATH" >> /etc/profile
+EOF
+
+sudo chown root:staff $root/usr/local/tce.installed/harmony
+sudo chmod 775 $root/usr/local/tce.installed/harmony
+
+
+# PACKAGE
+rm -f $HERE/harmony.tcz
+cd $root
+mksquashfs . $HERE/harmony.tcz
+
+
+# DEPENDENCIES
+rm -f $HERE/harmony.tcz.dep
+$HERE/bin/lsdeps $HERE/harmony.tcz >> $HERE/harmony.tcz.dep
+cat $HERE/harmony.tcz.dep | sort -u > $HERE/harmony.tcz.dep
+

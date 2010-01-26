@@ -1,0 +1,21 @@
+PACKAGE="phat"
+VERSION="0.4.1"
+DOWNLOAD_PATH="http://download.berlios.de/phat"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="PHAT"
+SITE="http://phat.berlios.de/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/31 Initial Version"
+
+
+
+
+
+
+  
+
+ 

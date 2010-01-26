@@ -1,0 +1,14 @@
+PACKAGE="jacknone"
+VERSION="0.2"
+
+CONFIGURE_OPTIONS="--prefix=/usr/local --dbus --classic"
+
+AUTHOR=""
+DESCRIPTION=""
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/08/04 Initial Version"
+
+export CXXFLAGS="${CFLAGS}"

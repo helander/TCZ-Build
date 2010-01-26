@@ -1,0 +1,9 @@
+#!/bin/sh
+tcedir=$1
+here=`pwd`
+tcebase=`basename $tcedir`
+mkdir -p /tmp/mkopttce/opt/tce
+cp $tcedir/*.tcz /tmp/mkopttce/opt/tce
+cd /tmp/mkopttce
+find | sudo cpio -o -H newc | gzip -2 > $here/$tcebase.gz 
+rm -fr /tmp/mkopttce

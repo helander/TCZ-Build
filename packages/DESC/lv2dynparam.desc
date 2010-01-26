@@ -1,0 +1,41 @@
+PACKAGE="lv2dynparam"
+VERSION="git"
+SRC_DIR="${PACKAGE}"
+AUTHOR=""
+DESCRIPTION="lv2dynparam"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/27 Initial Version"
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+
+tcbuild_download()
+{
+  echo "No download. Unpack will get stuff via git."
+}
+
+tcbuild_unpack()
+{
+  rm -fr ${SRC_BASE}/${PACKAGE}
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  git clone git://repo.or.cz/${PACKAGE}.git
+  cd $PACKAGE
+  ./bootstrap
+}
+
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p $root/usr/local/include
+  cp /home/tc/tcbuild/import/lv2_dyn_manifest.h $root/usr/local/include
+
+}

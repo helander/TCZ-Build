@@ -1,0 +1,60 @@
+PACKAGE="set_rlimits"
+VERSION="1.3.0"
+DOWNLOAD_PATH="http://www.physics.adelaide.edu.au/~jwoithe"
+SRC_FILE="${PACKAGE}-${VERSION}.tgz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="J Woithe"
+DESCRIPTION="Set process resource limits"
+SITE="http://www.physics.adelaide.edu.au/~jwoithe"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/19 Initial Version"
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  touch *.c
+}
+
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+
+  mkdir -p ${BIN_BASE}/${PACKAGE}/root
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+  mkdir -p "${root}/usr/local/bin"
+  mkdir -p "${root}/usr/local/etc"
+  mkdir -p "${root}/usr/local/tce.installed"
+
+  cp ${PACKAGE} ${root}/usr/local/bin/
+
+  sudo chown 0.0 ${root}/usr/local/bin/${PACKAGE}
+  sudo chmod u+s ${root}/usr/local/bin/${PACKAGE}
+
+  cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+#!/bin/sh
+cp /usr/local/etc/${PACKAGE}.conf /etc
+EOF
+
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+  cat <<EOF >"${root}/usr/local/bin/startx"
+#!/bin/sh
+/usr/local/bin/set_rlimits /usr/bin/startx
+EOF
+
+   chmod +x  ${root}/usr/local/bin/startx
+
+  cat <<EOF >"${root}/usr/local/etc/set_rlimits.conf"
+@audio  /bin/sh  nice=-1  rtprio=90 memlock=4000000
+@audio  /usr/bin/startx  nice=-1  rtprio=90 memlock=4000000
+EOF
+ 
+  sudo chown 0.0 ${root}/usr/local/etc/set_rlimits.conf
+}
+  

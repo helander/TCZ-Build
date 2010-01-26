@@ -1,0 +1,17 @@
+PACKAGE="zcore"
+VERSION="1.0"
+AUTHOR="Lars-Erik Helander"
+DESCRIPTION="Metapackage for zcore"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2010/01/06 Initial Version"
+DEPS=" squashfs-tools-4.0.tcz rsync.tcz busybox-httpd.tcz sound-init.tcz alsa.tcz LXDE.tcz tctoolsmenu.tcz \
+set_rlimits.tcz wifi-radar.tcz Xorg-7.4.tcz \
+chromium-browser.tcz 
+Xprogs.core.tcz Xlibs.core.tcz
+"
+
+
+. ${TCBUILD_DIR}/meta.inc

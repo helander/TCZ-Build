@@ -1,0 +1,100 @@
+PACKAGE="qtractor"
+VERSION="0.4.4"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/qtractor"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Rui Nuno Capela"
+DESCRIPTION="Audio/MIDI multi-track sequencer application"
+SITE="http://qtractor.sourceforge.net/"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+tcbuild_download()
+{
+  echo "DOWNLOADING"
+  mkdir -p "${DOWNLOADS_DIR}"
+  cd "${DOWNLOADS_DIR}"
+  echo wget $DOWNLOAD_PATH/$SRC_FILE
+  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/${SRC_FILE}"
+
+  [ -f aeffect.h ] || wget http://lars-helander.name/aeffect.h
+  [ -f aeffectx.h ] || wget http://lars-helander.name/aeffectx.h
+
+
+  echo "DOWNLOADING DONE"
+}
+
+tcbuild_unpack()
+{
+  echo "UNPACKING"
+  if [ -z "$SRC_FILE" ]; then
+    [ -f $DOWNLOADS_DIR/$PACKAGE-$VERSION.tar.gz ] && SRC_FILE="$PACKAGE-$VERSION.tar.gz"
+    [ -f $DOWNLOADS_DIR/$PACKAGE-$VERSION.tgz ] && SRC_FILE="$PACKAGE-$VERSION.tgz"
+    [ -f $DOWNLOADS_DIR/$PACKAGE-$VERSION.tar.bz2 ] && SRC_FILE="$PACKAGE-$VERSION.tar.bz2"
+    [ -f $DOWNLOADS_DIR/$PACKAGE-$VERSION.tbz2 ] && SRC_FILE="$PACKAGE-$VERSION.tbz2"
+    if [ -z "$SRC_FILE" ]; then
+      echo Could not find out what Source file system to use.
+      return 1
+    fi
+  fi
+
+
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  case ${SRC_FILE} in
+  *.tar.gz|*.tgz)
+    tar zxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.tar.bz2|*.tbz2)
+    tar jxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.zip)
+    unzip "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  esac
+
+ 
+  sudo cp ${DOWNLOADS_DIR}/aeffect.h /usr/local/include
+  sudo cp ${DOWNLOADS_DIR}/aeffectx.h /usr/local/include
+
+  echo "UNPACKING DONE"
+}
+
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f icons/${PACKAGE}.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/${PACKAGE}
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">/usr/local/bin/${PACKAGE}</Program>
+</JWM>
+EOF
+
+
+  mkdir -p "${root}/usr/local/tce.installed"
+  cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+#!/bin/sh
+modprobe snd-seq
+EOF
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+
+}

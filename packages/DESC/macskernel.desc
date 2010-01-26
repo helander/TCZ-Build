@@ -1,0 +1,280 @@
+# If you already are familiar how to use this file, skip this introductory
+# section and goto the SETUP SECTION.
+#-----------------------------------------------------------------------------
+# Using tcbuild with this file allows you to build:
+#     * a custom kernel, patched and configured according to your own choice
+#     * the modules and firmware to use in your root file system (packaged into
+#       tcz extensions).
+#     * additional dynamically installable tcz extensions. The example
+#       as provided by this file builds a "sound" modules extension and a "rest"
+#       modules extension that contains the modules not built into the root file
+#       system or the "sound" extension.
+#
+# The built root file system extension is only for use during creation of 
+# your rootfs (in TC/MC this is named tinycore.gz/microcore.gz).
+#
+# Typical usage:
+#        Follow the instructions in the SETUP SECTION before you start
+#        tcbuild download
+#        tcbuild unpack
+#        tcbuild configure
+#        tcbuild compile
+#        tcbuild install
+#        tcbuild postinstall
+#        tcbuild packages
+#
+#
+#
+# The result from the build is located at /tmp/tcbuild/bin/$PACKAGE
+# where $PACKAGE is the name you have choosen for your kernel (see below).
+# In this directory you will find the built tcz extensions and the
+# kernel image (named vmlinuz.$PACKAGE-$VERSION).
+#
+# In order to create a root file system, take an existing root file system
+# , e.g. tinycore.gz. Unpack it:
+#              mkdir temp
+#              cd temp
+#              gunzip -c ../tinycore.gz | cpio -idm
+#
+# Remove old modules:
+#              rm -fr lib/modules lib/firmware
+#
+# Add the modules from the rootfs package of your kernel build:
+#              tar zxf /tmp/tcbuild/bin/$PACKAGE/rootfs-$PACKAGE-$VERSION.tcem
+#
+# Now we pack a new root file system:
+#              find . | cpio -o -H newc | gzip -9 >../myrootfs.gz
+#
+# Copy the kernel image and packed root file system to wherever you boot from
+# and update your boot configuration (grub, lilo, syslinux, ...) to boot
+# using these files.
+#-----------------------------------------------------------------------------
+
+# SETUP SECTION
+# START OF MANDATORY SETUP SECTION
+#-----------------------------------------------------------------------------
+# Here you define the name and version of your custom kernel
+#-----------------------------------------------------------------------------
+DESCRIPTION="Custom Linux kernel"
+PACKAGE="macskernel"
+VERSION="0.5"
+MAINTAINER="helander"
+COMMENTS="Kernel for macs"
+CHANGELOG="2009/06/30 first version 0.1
+2009/07/01 v 0.2: added the TC patches
+2009/07/02 v.0.3: vfat + usb drivers included in kernel
+2009/07/13 v.0.4: disk drivers inclued in kernel. new kernel and RT version
+2009/07/30 v.0.5: kernel 2.6.31-rc4-rt1"
+
+#------------------------------------------------------------------------------
+# Linux kernel version
+#------------------------------------------------------------------------------
+# You need to base your kernel on some available version of the
+# standard Linux kernel
+#------------------------------------------------------------------------------
+KERNEL_VERSION="2.6.31.6"
+
+#-----------------------------------------------------------------------------
+# The following varaibles need to be setup properly before you run tcbuild
+# on this file.
+#-----------------------------------------------------------------------------
+# What set of modules to include in the rootfs package?
+# This is read from the file pointed out by MODULES_FILE
+MODULES_FILE="${DOWNLOADS_DIR}/microcore.modules"
+
+# It's much easier to start with a kernel config file from some suitable
+# older version, in this case the current tinycore kernel.
+# ORIGIN_CONFIG_FILE points out this file.
+# The first time you run the "configure" stage of tcbuild, you will be lead thru
+# the process that updates your configuration to the current kernel version. This
+# new configuration is stored in a file pointed out by CONFIG_FILE.
+ORIGIN_CONFIG_FILE="config-2.6.29.1-tinycore"
+#-----------------------------------------------------------------------------
+# END OF MANDATORY SETUP SECTION
+
+# OPTIONAL PATCHES
+#-----------------------------------------------------------------------------
+# During the "download" stage of tcbuild you could add download of patches
+# that you would like to apply. The patches are applied to the standard linux
+# source code during the "unpack" stage of tcbuild.
+# Please update the code for tcbuild_download() and tcbuild_unpack() to suit
+# your needs.
+# PLEASE NOTE: Not all patches available out there will work with arbitrary
+#              kernel configurations. You need to make sure that the set
+#              of patches you intend to apply are "compliant" with your
+#              configuration. How to do this is outside the scope of this
+#              build system.
+#----------------------------------------------------------------------------
+# My specfic definitions
+#----------------------------------------------------------------------------
+TC_DOWNLOAD_PATH="ftp://ftp.ibiblio.org/pub/linux/distributions/tinycorelinux/2.x/release"
+TC_PATCH_FILE="2.6.29.1-tinycore.patch.gz"
+RT_VERSION="rt19"
+RT_PATCH_FILE="patch-${KERNEL_VERSION}-${RT_VERSION}.bz2"
+#----------------------------------------------------------------------------
+# END OF SETUP SECTION
+
+#----------------------------------------------------------------------------
+DOWNLOAD_PATH="ftp://ftp.kernel.org/pub/linux/kernel"
+SRC_DIR="linux-${KERNEL_VERSION}"
+SRC_FILE="${SRC_DIR}.tar.bz2"
+AUTHOR="Linus Torvalds"
+SITE="http://www.kernel.org/"
+COPYING="GPL"
+
+CONFIG_FILE="${BIN_BASE}/${PACKAGE}/config-${PACKAGE}-${VERSION}"
+EXPORTED_CONFIG_FILE="${TCBUILD_DIR}/export/config-${PACKAGE}-${VERSION}"
+
+tcbuild_download()
+{
+  mkdir -p "${DOWNLOADS_DIR}"
+  cd "${DOWNLOADS_DIR}"
+#  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/v2.6/testing/${SRC_FILE}"
+  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/v2.6/${SRC_FILE}"
+  [ -f "${RT_PATCH_FILE}" ] || wget "${DOWNLOAD_PATH}/projects/rt/${RT_PATCH_FILE}"
+  [ -f "${TC_PATCH_FILE}" ] || wget "${TC_DOWNLOAD_PATH}/src/${TC_PATCH_FILE}"
+  [ -f "${ORIGIN_CONFIG_FILE}" ] || wget "${TC_DOWNLOAD_PATH}/src/${ORIGIN_CONFIG_FILE}"
+}
+
+tcbuild_unpack()
+{
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  case ${SRC_FILE} in
+  *.tar.gz|*.tgz)
+    tar zxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.tar.bz2|*.tbz2)
+    tar jxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.zip)
+    unzip "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  esac 
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+
+#  gzip  -cd ${DOWNLOADS_DIR}/${TC_PATCH_FILE} | patch -p1
+  bzip2 -cd ${DOWNLOADS_DIR}/${RT_PATCH_FILE} | patch -p1
+  
+}
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  [ -f "${DOWNLOADS_DIR}/${ORIGIN_CONFIG_FILE}" ] && cp ${DOWNLOADS_DIR}/${ORIGIN_CONFIG_FILE} .config
+  [ -f "${EXPORTED_CONFIG_FILE}" ] && cp ${EXPORTED_CONFIG_FILE} .config
+  [ -f "${CONFIG_FILE}" ] && cp ${CONFIG_FILE} .config
+  make oldconfig
+  make menuconfig
+  mkdir -p ${BIN_BASE}/${PACKAGE}
+  cp .config ${CONFIG_FILE}
+}
+
+tcbuild_install()
+{
+  cd ${SRC_BASE}/${PACKAGE}/${SRC_DIR}
+  make INSTALL_MOD_PATH="${BIN_BASE}/${PACKAGE}/root" modules_install firmware_install
+  cp arch/x86/boot/bzImage ${BIN_BASE}/${PACKAGE}/$PACKAGE-$VERSION
+  cd ${BIN_BASE}/${PACKAGE}/root
+  for F in $(find  -name *.ko); do
+    gzip -9 $F
+  done
+}
+
+tcbuild_postinstall()
+{
+  set -e
+  root="${BIN_BASE}/${PACKAGE}/root"
+  kname=$(ls $root/lib/modules)
+
+  rootfs="${BIN_BASE}/${PACKAGE}/rootfs"
+  rm -rf "${rootfs}"
+  mkdir -p "${rootfs}"
+
+  for F in $(cat $MODULES_FILE); do
+     filep="lib/modules/$kname/kernel/$F"
+     source="$root/$filep"
+     target="$rootfs/$filep"
+     if [ -f $source ]; then
+        [ -d ${target%/*} ] || mkdir -p ${target%/*}
+        mv $source $target
+     else
+       echo "No file $source"
+     fi
+  done
+
+  ln -s  /usr/local/lib/modules/$kname/kernel $rootfs/lib/modules/$kname/kernel.tclocal
+  depmod -b $rootfs $kname
+
+
+  sound="${BIN_BASE}/${PACKAGE}/sound"
+  rm -rf "${sound}"
+  mkdir -p "${sound}"
+  filep="lib/modules/$kname/kernel/sound"
+  source="$root/$filep"
+  target="$sound/usr/local/$filep"
+  if [ -d $source ]; then
+     mkdir -p $target
+     mv $source/* $target
+  fi
+
+  rest="${BIN_BASE}/${PACKAGE}/rest"
+  rm -rf "${rest}"
+  mkdir -p "${rest}"
+  filep="lib/modules/$kname/kernel"
+  source="$root/$filep"
+  target="$rest/usr/local/$filep"
+  if [ -d $source ]; then
+     mkdir -p $target
+     mv $source/* $target
+  fi
+
+  firmware="${BIN_BASE}/${PACKAGE}/firmware"
+  rm -rf ${firmware}
+  mkdir -p ${firmware}/lib
+  mv ${root}/lib/firmware ${firmware}/lib
+#  This firmware is now available in the iwlwifi extension package
+#  cp ${TCBUILD_DIR}/import/ipw2200-*.fw ${firmware}/lib/firmware
+
+}
+
+tcbuild_packages()
+{
+  tcbuild_initramfs  "rootfs-${PACKAGE}-${VERSION}" "rootfs" \
+  "Rootfs modules."
+  
+  tcbuild_package  "sound-${PACKAGE}-${VERSION}" "sound" \
+  "Sound modules."
+  
+  tcbuild_package  "rest-${PACKAGE}-${VERSION}" "rest" \
+  "Rest of the built modules."
+  
+  tcbuild_package  "firmware-${PACKAGE}-${VERSION}" "firmware" \
+  "Firmware that comes with the kernel."
+}
+
+tcbuild_export()
+{
+  cd ${BIN_BASE}/${PACKAGE}
+  for f in *.tcz* ; do
+    echo "Exporting $f"
+    cp $f ${TCBUILD_DIR}/export/tcz
+  done
+
+  cd ${BIN_BASE}/${PACKAGE}
+  for f in *.cpio.gz ; do
+    echo "Exporting $f"
+    cp $f ${TCBUILD_DIR}/export
+  done
+
+
+  cp ${PACKAGE}-${VERSION} ${TCBUILD_DIR}/export
+  cp config-${PACKAGE}-${VERSION} ${TCBUILD_DIR}/export
+
+  tar cf ${TCBUILD_DIR}/export/${PACKAGE}-${VERSION}.tar ${PACKAGE}-${VERSION} \
+    *-${PACKAGE}-${VERSION}.tcz config-${PACKAGE}-${VERSION}
+}
+
+
+
+ 

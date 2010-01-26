@@ -1,0 +1,29 @@
+PACKAGE="ardour"
+VERSION="2.8.2"
+DOWNLOAD_PATH="http://xxxx"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION=""
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/08/04 Initial Version"
+
+tcbuild_configure()
+{
+  echo No configuration required.
+}
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  scons
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+#######  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+}

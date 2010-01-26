@@ -1,0 +1,49 @@
+PACKAGE="fluidjack"
+VERSION="master"
+DOWNLOAD_PATH=""
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="fluidjack"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/08/06 Initial Version"
+
+
+tcbuild_download()
+{
+  mkdir -p "${DOWNLOADS_DIR}"
+  cd "${DOWNLOADS_DIR}"
+  echo wget $DOWNLOAD_PATH/$SRC_FILE
+  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/${SRC_FILE}"
+}
+
+
+
+
+
+tcbuild_configure()
+{
+  echo  No configuration needed. 
+}
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make
+}
+
+tcbuild_install()
+{
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  rm -fr $root
+  mkdir -p ${root}/usr/local/bin
+
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  cp $PACKAGE $root/usr/local/bin
+
+
+}

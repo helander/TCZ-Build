@@ -1,0 +1,36 @@
+PACKAGE="a2jmidid"
+VERSION="5"
+DOWNLOAD_PATH="http://download.gna.org/a2jmidid"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="ALSA to JACK midi mapper"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/25 Initial Version"
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --prefix=/usr/local configure
+}
+
+tcbuild_compile()
+{
+#  JOBS="`grep ^processor /proc/cpuinfo | wc -l`"
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+#  make -j"${JOBS}"
+  ./waf build
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --destdir="${BIN_BASE}/${PACKAGE}/root" install
+}
+
+
+

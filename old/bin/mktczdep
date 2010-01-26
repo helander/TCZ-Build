@@ -1,0 +1,56 @@
+#!/bin/sh
+PACKAGE=$1
+verbose=$2
+
+PACK_DIR=/mnt/hda1/TMP/bin/$PACKAGE
+PKGFILE=$PACK_DIR/$PACKAGE.tcz
+
+listlines() { 
+  for i in $*; do
+     echo $i
+  done
+}
+
+
+rm -f PKGFILE.dep
+
+repo="/mnt/hda1/REPO/tcz/"
+content=`mktemp -t -d`
+sudo mount $PKGFILE $content -t squashfs -o loop,ro,bs=4096
+files=`find $content`
+tmpdeps=`mktemp -t`
+unset alldeps
+for f in $files; do
+#  ldd $f 2>/dev/null | \
+#    grep -e "=> /usr/local" -e "=> not found" | \
+#    awk '{print $1}' >> $tmpdeps  
+  xxx=`ldd $f 2>/dev/null | grep -e "=> /usr/local" -e "=> not found" | awk '{print $1}'`
+  [ "$xxx" ] && echo "$f ==> $xxx"
+  [ "$xxx" ] && alldeps="$alldeps $xxx"
+done
+echo alldeps $alldeps
+yyy=`listlines $alldeps | sort -u`
+echo DDD $yyy
+exit
+fdeps=`sort -u $tmpdeps`
+rm -f $tmpdeps
+for f in $fdeps; do
+ echo $f "----->"
+ deps=`grep -l $f $repo/*.tcz.list`
+ many=""
+ for d in $deps; do
+   bd=`basename $d | sed "s/.tcz.list/.tcz/"`
+   if [ "$bd" != "$PACKAGE" ]; then
+     echo "  " $bd
+     echo "$bd" >> $tmpdeps
+   fi
+   [ -n "$many" ] && echo "WARNING!!!!!!!!! $f is found in multiple extensions !!!!!WARNING"
+   many="yes"
+ done
+done
+if [ -f $tmpdeps ]; then
+  sort -u $tmpdeps > PKGFILE.dep 
+fi
+
+
+

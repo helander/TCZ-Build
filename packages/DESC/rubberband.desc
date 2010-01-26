@@ -1,0 +1,16 @@
+http://breakfastquay.com/rubberband/files/rubberband-1.3.tar.bz2
+PACKAGE="rubberband"
+VERSION="1.3"
+DOWNLOAD_PATH="http://breakfastquay.com/rubberband/files"
+SRC_FILE="rubberband-${VERSION}.tar.bz2"
+SRC_DIR="rubberband-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Rubberband"
+SITE="http://breakfastquay.com/rubberband"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS="Rubberband"
+CHANGELOG="2009/06/22 Initial Version"
+
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"

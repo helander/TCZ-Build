@@ -1,0 +1,50 @@
+PACKAGE="zdev"
+VERSION="1.0"
+AUTHOR="Lars-Erik Helander"
+DESCRIPTION="Metapackage for development environment"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2010/01/06 Initial Version"
+DEPS=" 
+alsa-dev.tcz
+bzip2-dev.tcz
+celt.tcz
+cmake.tcz
+compiletc.tcz
+dssi.tcz
+flac-dev.tcz
+fltk-fluid.tcz
+fltk2.tcz
+fluidsynth.tcz
+git.tcz
+glib2-dev.tcz
+glibc_add_libs.tcz
+gtk2-dev.tcz
+gtkmm.tcz
+ladspa.tcz
+libfftw3f.tcz
+libfftw3l.tcz
+liblo.tcz
+libmad-dev.tcz
+libsamplerate-dev.tcz
+libsndfile-dev.tcz
+libxslt.tcz
+ogg-vorbis-dev.tcz
+python-dev.tcz
+qt-4.5-dbus.tcz
+qt-4.5-dev.tcz
+qt-4.5-extended.tcz
+qt-4.5-xml.tcz
+readline-dev.tcz
+rubberband.tcz
+scons.tcz
+vamp-plugin-sdk.tcz
+wine-gl-dev.tcz
+wxgtk-dev.tcz
+zcore.tcz
+"
+
+
+. ${TCBUILD_DIR}/meta.inc

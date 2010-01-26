@@ -1,0 +1,27 @@
+#!/bin/sh
+metapackage=$1
+tcedir=$2
+repodir=/mnt/hda1/MIRROR/tcz
+[ -n "$3" ] && basedir=$3
+rm -fR $tcedir/*.tcz* $tcedir/tce.*
+cp $repodir/$metapackage.tcz* $tcedir
+missing="start"
+while [ -n "$missing" ]; do
+  tce-audit builddb $tcedir 1>/dev/null
+  missing=`tce-audit auditall $tcedir | awk '{print $3}'`
+  for m in $missing; do
+    p=`basename $m`
+    echo "   import  $p"
+    cp $repodir/$p* $tcedir 
+  done
+done
+for f in $tcedir/*.tcz; do
+    p=`basename $f`
+    discard=""
+    [ -n "$basedir" ] && [ -f $basedir/$p ] && discard="yes"
+    if [ -n "$discard" ]; then
+      echo "   discard  $p"
+      rm $tcedir/$p* 
+    fi
+
+done

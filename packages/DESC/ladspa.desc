@@ -1,0 +1,29 @@
+PACKAGE="ladspa"
+VERSION="1.13"
+DOWNLOAD_PATH="http://www.ladspa.org/download"
+SRC_FILE="${PACKAGE}_sdk_${VERSION}.tgz"
+SRC_DIR="${PACKAGE}_sdk"
+AUTHOR="Richard Furse"
+DESCRIPTION="LADSPA SDK - Linux Audio Developer's Simple Plugin API"
+SITE="http://www.ladspa.org/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS="LADSPA SDK"
+CHANGELOG="2010/01/05 Initial Version"
+
+tcbuild_configure()
+{
+  echo "No configure - this is OK"
+}
+
+tcbuild_compile()
+{
+  echo "No compile - this is OK"
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/src"
+  mkdir -p ${BIN_BASE}/${PACKAGE}/root/usr/local/include
+  cp ladspa.h ${BIN_BASE}/${PACKAGE}/root/usr/local/include
+}

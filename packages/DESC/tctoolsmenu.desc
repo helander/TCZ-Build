@@ -1,0 +1,258 @@
+DESCRIPTION="TC Tools menu extension for freedesktop.org compliant desktops."
+PACKAGE="tctoolsmenu"
+VERSION="1.0"
+MAINTAINER="helander"
+COMMENTS="
+When using LXDE I missed easy access to a number of TC/MC specific tools.
+This extension provides access to these tools via the desktop's
+applications menu. The tools appear under a sub menu to the System Tools entry in the applications menu.
+
+Only tested with LXDE in TC and MC but should work with any
+freedesktop.org compliant desktop."
+CHANGELOG="2010/01/03 Initial version"
+AUTHOR="Lars-Erik Helander"
+SITE=""
+COPYING="GPL"
+
+tcbuild_download()
+{
+  echo "No download defined."
+}
+
+tcbuild_unpack()
+{
+  echo "No unpack defined."
+}
+
+tcbuild_configure()
+{
+ echo "No configure defined."
+}
+
+tcbuild_compile()
+{
+ echo "No compile defined."
+}
+
+tcbuild_install()
+{
+  mkdir -p ${BIN_BASE}/${PACKAGE}/root
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+  mkdir -p "${root}/usr/local/etc/xdg/menus/applications-merged"
+  mkdir -p "${root}/usr/local/share/desktop-directories"
+  mkdir -p "${root}/usr/local/share/applications"
+  mkdir -p "${root}/usr/local/tce.installed"
+
+
+  cat <<EOF >"${root}/usr/local/share/desktop-directories/tc-tools.directory"
+[Desktop Entry]
+Name=TC Tools
+Comment=TC specific tools
+Icon=/home/tc/.logo.xpm
+Type=Directory
+EOF
+
+  cat <<EOF >"${root}/usr/local/etc/xdg/menus/applications-merged/tc-tools.menu"
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+ "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+
+<Menu>
+<Name>Applications</Name>
+<Menu>
+<Name>System</Name>
+<Menu>
+	<Name>TC Tools</Name>
+	<Directory>tc-tools.directory</Directory>
+
+	<Include>
+		<And>
+			<Category>TCTool</Category>
+		</And>
+	</Include>
+</Menu>
+</Menu>
+</Menu>
+
+EOF
+
+  cat <<EOF >"${root}/usr/local/share/applications/addbootlocal.desktop"
+[Desktop Entry]
+Name=Add to bootlocal
+Comment=TC Tool for adding a file to bootlocal
+GenericName=Add to bootlocal
+Exec=/usr/bin/add2file /opt/bootlocal.sh
+Icon=/home/tc/.logo.xpm
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+
+  cat <<EOF >"${root}/usr/local/share/applications/addfiletool.desktop"
+[Desktop Entry]
+Name=Add to filetool
+Comment=TC Tool for adding a file to filetool list
+GenericName=Add to filetool
+Exec=/usr/bin/add2file /opt/.filetool.lst
+Icon=/home/tc/.logo.xpm
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/addxfiletool.desktop"
+[Desktop Entry]
+Name=Add to xfiletool
+Comment=TC Tool for adding a file to xfiletool list
+GenericName=Add to xfiletool
+Exec=/usr/bin/add2file /opt/.xfiletool
+Icon=/home/tc/.logo.xpm
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/appsaudit.desktop"
+[Desktop Entry]
+Name=Apps audit
+Comment=TC Tool for auditing of installed extensions
+GenericName=Apps audit
+Exec=appsaudit
+Icon=/home/tc/.logo.xpm
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/tchelp.desktop"
+[Desktop Entry]
+Name=TC Help
+Comment=TC Tool for showing TC information/
+GenericName=TC Help
+Exec=help /usr/share/doc/tc/help.html
+Icon=/home/tc/.logo.xpm
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/maketclocal.desktop"
+[Desktop Entry]
+Name=Make tclocal
+Comment=TC Tool for creating tclocal storage
+GenericName=Make tclocal
+Exec=sudo /usr/bin/mktclocal
+Icon=/home/tc/.logo.xpm
+Terminal=true
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/swapfile.desktop"
+[Desktop Entry]
+Name=Swapfile tool
+Comment=TC Tool for swapfile management
+GenericName=Swapfile tool
+Exec=/usr/bin/swapfile
+Icon=/home/tc/.logo.xpm
+Terminal=false
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/tcterminalserver.desktop"
+[Desktop Entry]
+Name=TC Terminal Server
+Comment=TC Tool for managing a TC Terminal Server
+GenericName=TC Terminal Server
+Exec=sudo /usr/bin/tc-terminal-server
+Icon=/home/tc/.logo.xpm
+Terminal=true
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/usbinstall.desktop"
+[Desktop Entry]
+Name=USB Install
+Comment=TC Tool for installing TC on a US stick
+GenericName=USB Install
+Exec=sudo /usr/bin/usbinstall
+Icon=/home/tc/.logo.xpm
+Terminal=true
+StartupNotify=true
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/updateextensions.desktop"
+[Desktop Entry]
+Name=Update extensions
+Comment=TC Tool for updating installed extensions
+GenericName=Update extensions
+Exec=/usr/bin/tce-update
+Icon=/home/tc/.logo.xpm
+Terminal=true
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+  cat <<EOF >"${root}/usr/local/share/applications/xvesasetup.desktop"
+[Desktop Entry]
+Name=Xvesa setup
+Comment=TC Tool for setup of Xvesa server
+GenericName=Xvesa setup
+Exec=/usr/bin/xsetup.sh
+Icon=/home/tc/.logo.xpm
+Terminal=true
+StartupNotify=false
+Type=Application
+Categories=TCTool;
+
+EOF
+
+  cat <<EOF >"${root}/usr/local/share/applications/usbinstall.desktop"
+[Desktop Entry]
+Name=USB Install
+Comment=TC Tool for installing TC on a US stick
+GenericName=USB Install
+Exec=sudo usbinstall
+Icon=/home/tc/.logo.xpm
+Terminal=true
+StartupNotify=true
+Type=Application
+Categories=TCTool;
+
+EOF
+
+
+
+
+
+
+  cat <<EOF >"${root}/usr/local/tce.installed/tctoolsmenu"
+#!/bin/sh
+mkdir -p /etc/xdg/menus/applications-merged
+cp /usr/local/etc/xdg/menus/applications-merged/tc-tools.menu /etc/xdg/menus/applications-merged
+EOF
+
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+}
+  
+tcbuild_postinstall()
+{
+ echo "No postinstall defined."
+}
+
+ 

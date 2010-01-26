@@ -1,0 +1,5 @@
+#!/bin/sh
+packages=`cat $1`
+for p in $packages; do
+  bin/lsdeps /mnt/hda1/MIRROR/tcz/$p.tcz > /mnt/hda1/MIRROR/tcz/$p.tcz.dep
+done

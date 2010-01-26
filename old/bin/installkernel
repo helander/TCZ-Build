@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo tar xf $1 -C ../

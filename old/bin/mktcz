@@ -1,0 +1,15 @@
+#!/bin/sh
+PACKAGE=$1
+PACK_DIR=/mnt/hda1/TMP/bin/$PACKAGE
+
+PKGFILE=$PACK_DIR/$PACKAGE.tcz
+
+rm -f $PKGFILE
+cd $PACK_DIR/root
+find ! -type d > $PKGFILE.list
+mksquashfs . $PKGFILE
+md5sum $PKGFILE | sed 's@/.*/@@' > "$PKGFILE.md5.txt"
+
+
+
+

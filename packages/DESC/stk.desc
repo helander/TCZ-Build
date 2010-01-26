@@ -1,0 +1,15 @@
+PACKAGE="stk"
+VERSION="4.2.1"
+#DOWNLOAD_PATH="http://ccrma.stanford.edu/software/stk/release"
+AUTHOR=""
+DESCRIPTION=""
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/08/11 Initial Version"
+
+SRC_DIR="${PACKAGE}-${VERSION}/src"
+CONFIG_DIR="${PACKAGE}-${VERSION}"
+
+CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --with-jack --with-alsa"

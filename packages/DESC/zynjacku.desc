@@ -1,0 +1,71 @@
+PACKAGE="zynjacku"
+VERSION="git"
+SRC_DIR="${PACKAGE}"
+AUTHOR=""
+DESCRIPTION="zynjacku"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/27 Initial Version"
+
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+
+tcbuild_download()
+{
+  echo "No download. Unpack will get stuff via git."
+}
+
+tcbuild_unpack()
+{
+  rm -fr ${SRC_BASE}/${PACKAGE}
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  git clone git://repo.or.cz/${PACKAGE}.git
+  cd $PACKAGE
+  ./bootstrap
+}
+
+
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f art/icons/32x32/apps/${PACKAGE}.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  cp -f art/icons/32x32/apps/${PACKAGE}.png "${root}/usr/local/tce.icons/lv2rack.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/$PACKAGE
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.icons/lv2rack"
+i: /usr/local/tce.icons/lv2rack.png
+t: lv2rack
+c: /usr/local/bin/lv2rack
+EOF
+
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">/usr/local/bin/$PACKAGE</Program>
+</JWM>
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/lv2rack"
+<JWM>
+<Program label="lv2rack">/usr/local/bin/lv2rack</Program>
+</JWM>
+EOF
+
+}

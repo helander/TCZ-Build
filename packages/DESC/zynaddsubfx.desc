@@ -1,0 +1,120 @@
+PACKAGE="ZynAddSubFX"
+VERSION="2.4.0"
+DOWNLOAD_PATH="http://zynaddsubfx.sourceforge.net"
+SRC_FILE="${PACKAGE}-${VERSION}_pre_release.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="ZynAddSubFX"
+SITE="http://zynaddsubfx.sourceforge.net/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS="Excellent synth"
+CHANGELOG="2009/07/15 Initial Version"
+
+
+
+
+tcbuild_download()
+{
+  mkdir -p "${DOWNLOADS_DIR}"
+  cd "${DOWNLOADS_DIR}"
+  echo wget $DOWNLOAD_PATH/$SRC_FILE
+  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/${SRC_FILE}"
+  [ -f "zyn2.4.0++.2.patch.bz2" ] || wget http://www.graggrag.com/zyn/zyn2.4.0++.2.patch.bz2
+}
+
+tcbuild_unpack()
+{
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  case ${SRC_FILE} in
+  *.tar.gz|*.tgz)
+    tar zxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.tar.bz2|*.tbz2)
+    tar jxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.zip)
+    unzip "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  esac
+
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+
+  
+
+  bzip2 -dc ${DOWNLOADS_DIR}/zyn2.4.0++.1.5.1.patch.bz2 | patch -p1
+
+  cp /home/tc/tcbuild/import/GuiThread.fl src/UI
+}
+
+
+
+tcbuild_configure()
+{
+  # Patches in order to build in TC/MC
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/src"
+  sed -i -e "s/\$(shell fltk-config --cflags)/-fno-exceptions -fno-rtti/" Makefile
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/ExternalPrograms/Controller"
+  sed -i -e "s/\`fltk-config --cflags\`/-fno-exceptions -fno-rtti/g" Makefile
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/ExternalPrograms/Spliter"
+  sed -i -e "s/\`fltk-config --cflags\`/-fno-exceptions -fno-rtti/g" Makefile
+
+#  # Modify the default configuration
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/src"
+#  sed -i -e "s/LINUX_AUDIOOUT=JACK_RT/LINUX_AUDIOOUT=FOOBAR_JACK_RT/" Makefile.inc
+#  #    The above line is to make sure JACK and not JACK_RT lines are modified below
+#  sed -i -e "s/^LINUX_AUDIOOUT=OSS/#LINUX_AUDIOOUT=OSS/" Makefile.inc
+#  sed -i -e "s/^#LINUX_AUDIOOUT=JACK/LINUX_AUDIOOUT=JACK/" Makefile.inc
+  sed -i -e "s/^LINUX_USE_LASH = NO/#LINUX_USE_LASH=NO/" Makefile.inc
+  sed -i -e "s/^#LINUX_USE_LASH = YES/LINUX_USE_LASH = YES/"  Makefile.inc
+ 
+}
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/src"
+  make
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/ExternalPrograms/Controller"
+  make
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/ExternalPrograms/Spliter"
+  make
+}
+
+tcbuild_install()
+{
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  rm -fr $root
+  mkdir -p ${root}/usr/local/bin
+
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/src"
+  install -D -m 0755 zynaddsubfx $root/usr/local/bin
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/ExternalPrograms/Controller"
+  install -D -m 0755 controller $root/usr/local/bin
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/ExternalPrograms/Spliter"
+  install -D -m 0755 spliter $root/usr/local/bin
+
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  mkdir -p $root/usr/share/zynaddsubfx
+  cp -r banks $root/usr/share/zynaddsubfx
+  cp -r examples $root/usr/share/zynaddsubfx
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  inkscapelite   -z -f src/zynaddsubfx_icon.svg -e ${root}/usr/local/tce.icons/zynaddsubfx.png
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/zynaddsubfx"
+i: /usr/local/tce.icons/zynaddsubfx.png
+t: zynaddsubfx
+c: set_rlimits /usr/local/bin/zynaddsubfx
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/zynaddsubfx"
+<JWM>
+<Program label="zynaddsubfx">set_rlimits /usr/local/bin/zynaddsubfx</Program>
+</JWM>
+EOF
+
+
+}

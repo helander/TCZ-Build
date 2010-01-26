@@ -1,0 +1,79 @@
+PACKAGE="lmms04"
+VERSION="0.4.6"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/lmms"
+SRC_FILE="lmms-${VERSION}.tar.bz2"
+SRC_DIR="lmms-${VERSION}"
+AUTHOR="mazza558"
+DESCRIPTION="Linux Multimedia Studio
+This package is called lmms04 in order for users that want to continue using
+the older lmms version in the repo. This version is significantly larger and
+contains more features.
+"
+SITE="http://lmms.sourceforge.net"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  rm -fr build
+  mkdir build
+  cd build
+#  cmake  ../ -DWANT_JACK=0 -DCMAKE_INSTALL_PREFIX=/usr/local
+  cmake  ../ -DCMAKE_INSTALL_PREFIX=/usr/local
+}
+
+tcbuild_compile()
+{
+  JOBS="`grep ^processor /proc/cpuinfo | wc -l`"
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/build"
+  make -j"${JOBS}"
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}/build"
+  make DESTDIR="${BIN_BASE}/${PACKAGE}/root" install
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+  sed -i "s%/usr/share%/usr/local/share%"  ${root}/usr/local/share/applications/lmms.desktop
+  sed -i "s%/usr/bin%/usr/local/bin%"  ${root}/usr/local/share/applications/lmms.desktop
+
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+
+  cp -f ${SRC_BASE}/${PACKAGE}/${SRC_DIR}/data/themes/default/icon.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/lmms
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">/usr/local/bin/lmms</Program>
+</JWM>
+EOF
+
+  mkdir -p "${root}/usr/local/tce.installed"
+  cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+#!/bin/sh
+modprobe snd-seq
+EOF
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+}
+
+
+
+

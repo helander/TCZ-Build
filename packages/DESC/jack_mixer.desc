@@ -1,0 +1,40 @@
+PACKAGE="jack_mixer"
+VERSION="dev"
+DOWNLOAD_PATH="http://lars-helander.name/arch-tcbuild/import"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Nedko Arnaudov"
+DESCRIPTION="jack enabled mixer"
+SITE="http://arnaudov.name/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/31 Initial Version"
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+
+  sed -i -e "s/ln -v/ln -/" Makefile
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f /home/tc/tcbuild/import/${PACKAGE}.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: set_rlimits /usr/local/bin/${PACKAGE}
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">set_rlimits /usr/local/bin/${PACKAGE}</Program>
+</JWM>
+EOF
+
+
+}

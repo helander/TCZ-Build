@@ -1,0 +1,52 @@
+PACKAGE="phasex"
+VERSION="0.12.0"
+DOWNLOAD_PATH="http://sysex.net/phasex"
+SRC_FILE="${PACKAGE}-${VERSION}-pre1.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="weston@sysex.net."
+DESCRIPTION="PHASEX is an experimental software synthesizer for use with Linux/ALSA/JACK."
+SITE="http://sysex.net/phasex"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+
+CONFIGURE_OPTIONS="--enable-arch=native"
+#tcbuild_configure()
+#{
+# cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+#  aclocal
+#  autoconf
+#  automake
+#  autoheader
+#  ./configure ${CONFIGURE_OPTIONS}
+#}
+
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f pixmaps/${PACKAGE}-icon-32x32.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/${PACKAGE}
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">sudo /usr/local/bin/${PACKAGE}</Program>
+</JWM>
+EOF
+
+
+}

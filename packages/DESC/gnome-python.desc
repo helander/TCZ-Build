@@ -1,0 +1,21 @@
+PACKAGE="gnome-python"
+VERSION="2.26.1"
+DOWNLOAD_PATH="http://ftp.gnome.org/pub/GNOME/sources/gnome-python/2.26"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="GNOME python"
+SITE="http://www.gnome.org/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/31 Initial Version"
+
+CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --disable-allbindings --enable-gconf"
+
+
+
+
+  
+
+ 

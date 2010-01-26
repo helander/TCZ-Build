@@ -1,0 +1,13 @@
+PACKAGE="zza"
+VERSION="1.0"
+AUTHOR="Lars-Erik Helander"
+DESCRIPTION="Metapackage for ztudio"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2010/01/06 Initial Version"
+DEPS=" zzb.tcz "
+
+
+. ${TCBUILD_DIR}/meta.inc

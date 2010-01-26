@@ -1,0 +1,15 @@
+PACKAGE="vamp-plugin-sdk"
+VERSION="2.0"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/vamp"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Vamp"
+SITE="http://vamp.sourceforge.net/"
+COPYING="BSD-style"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS="Vamp"
+CHANGELOG="2009/06/22 Initial Version"
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+

@@ -1,0 +1,16 @@
+PACKAGE="fluidsynth"
+VERSION="1.1.1"
+DOWNLOAD_PATH="http://mirrors.aixtools.net/sv/fluid"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Samuel Bianchini, Peter Hanappe and Johnathan Lee"
+DESCRIPTION="Soundfont synth"
+SITE="http://www.fluidsynth.org/"
+COPYING="LGPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+
+CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS --enable-ladspa"
+

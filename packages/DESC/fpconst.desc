@@ -1,0 +1,41 @@
+PACKAGE="fpconst"
+VERSION="0.7.3"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/rsoap"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Python XML extensions"
+SITE="http://pyxml.sourceforge.net/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/31 Initial Version"
+
+
+
+tcbuild_configure()
+{
+ echo "No configure defined."
+}
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  root="${BIN_BASE}/${PACKAGE}/root"
+  python setup.py build
+}
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+  python setup.py install --prefix=/usr/local --root=$root
+
+}
+  
+
+  
+
+ 

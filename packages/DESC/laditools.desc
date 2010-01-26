@@ -1,0 +1,41 @@
+PACKAGE="laditools"
+VERSION="1.0-rc1"
+DOWNLOAD_PATH="http://marcochapeau.org/files/laditools"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="LADITOOLS"
+SITE="http://marcochapeau.org/software/pyjackctl"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/08/02 Initial Version"
+
+
+
+tcbuild_configure()
+{
+ echo "No configure defined."
+}
+
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  root="${BIN_BASE}/${PACKAGE}/root"
+  python setup.py build
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+  python setup.py install --prefix=/usr/local --root=$root
+
+}
+  
+
+  
+
+ 

@@ -1,0 +1,23 @@
+PACKAGE="swh-lv2"
+VERSION="1.0.15"
+CONFIGURE_SYSTEM="none"
+
+AUTHOR=""
+DESCRIPTION=""
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/08/04 Initial Version"
+
+
+tcbuild_install()
+{
+  [ -z "$SRC_DIR" ] && SRC_DIR="${PACKAGE}-${VERSION}"
+
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  root="${BIN_BASE}/${PACKAGE}/root"
+  
+  make install-system INSTALL_DIR="$root/usr/local/lib/lv2"
+
+}

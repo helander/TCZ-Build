@@ -1,0 +1,209 @@
+DESCRIPTION="Configure the soundcard using alsasound from alsa."
+PACKAGE="sound-init"
+VERSION="1.0"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG=""
+AUTHOR="Lars-Erik Helander"
+SITE=""
+COPYING="GPL"
+DEPS="alsa.tcz"
+
+tcbuild_download()
+{
+  echo "No download defined."
+}
+
+tcbuild_unpack()
+{
+  echo "No unpack defined."
+}
+
+tcbuild_configure()
+{
+ echo "No configure defined."
+}
+
+tcbuild_compile()
+{
+ echo "No compile defined."
+}
+
+tcbuild_install()
+{
+  mkdir -p ${BIN_BASE}/${PACKAGE}/root
+  root="${BIN_BASE}/${PACKAGE}/root"
+
+  mkdir -p "${root}/usr/local/tce.installed"
+
+  cat <<EOF >"${root}/usr/local/tce.installed/sound-init"
+#!/bin/sh
+# ANSI COLORS
+CRE="\$(echo -e '\r\033[K')"
+NORMAL="\$(echo -e '\033[0;39m')"
+RED="\$(echo -e '\033[1;31m')"
+GREEN="\$(echo -e '\033[1;32m')"
+YELLOW="\$(echo -e '\033[1;33m')"
+BLUE="\$(echo -e '\033[1;34m')"
+MAGENTA="\$(echo -e '\033[1;35m')"
+CYAN="\$(echo -e '\033[1;36m')"
+WHITE="\$(echo -e '\033[1;37m')"
+
+
+setup_mixer()
+{
+  /usr/local/bin/amixer -s -q <<EOT
+set Master 75% unmute
+set Master -12dB
+set 'Master Mono' 75% unmute
+set 'Master Mono' -12dB
+set Front 75% unmute
+set Front -12dB
+set PCM 90% unmute
+set PCM 0dB
+mixer Synth 90% unmute
+mixer Synth 0dB
+mixer CD 90% unmute
+mixer CD 0dB
+# mute mic
+set Mic 0% mute
+# ESS 1969 chipset has 2 PCM channels
+set PCM,1 90% unmute
+set PCM,1 0dB
+# Trident/YMFPCI/emu10k1
+set Wave 100% unmute
+set Music 100% unmute
+set AC97 100% unmute
+# CS4237B chipset:
+set 'Master Digital' 75% unmute
+# Envy24 chips with analog outs
+set DAC 90% unmute
+set DAC -12dB
+set DAC,0 90% unmute
+set DAC,0 -12dB
+set DAC,1 90% unmute
+set DAC,1 -12dB
+# some notebooks use headphone instead of master
+set Headphone 75% unmute
+set Headphone -12dB
+set Playback 100% unmute
+# turn off digital switches
+set "SB Live Analog/Digital Output Jack" off
+set "Audigy Analog/Digital Output Jack" off
+EOT
+}
+
+
+echo "\${YELLOW}Start ALSA\${NORMAL}"
+
+##############################################################################
+## Make sure that the modules for the available PCI sound cards are loaded
+## This part may not be required since it seems like it has already been
+## done by udev at this stage.
+##############################################################################
+
+slots=\`lspci | awk '{print \$1}'\`
+for slot in \$slots ; do
+   module=\`lspci -k -s \$slot | grep -e "Kernel modules" | grep -e "snd" | cut -f 2 -d :\`
+   if [ -n "\$module" ] ; then
+      driver=\`lspci -k -s \$slot | grep -e "Kernel driver in use" | cut -f 2 -d :\`
+      echo "\${YELLOW}  Sound card \`lspci -s \${slot}\`\${NORMAL}"
+      echo -n "\${YELLOW}     Driver \${GREEN}\${driver}  \${YELLOW}Module \${GREEN}\${module}\${NORMAL}"
+      if [ -n "\`lsmod | awk '{print \$1}' | tr "_" "-" | grep \$module\`" ]; then
+         echo "\${CYAN}  [Loaded]\${NORMAL}"
+      else
+         echo "\${MAGENTA}  [Not loaded]\${NORMAL}"
+         echo "\${MAGENTA}     Load module \${m}\${NORMAL}"
+         modprobe \$module > /dev/null
+      fi
+   fi
+done
+
+##############################################################################
+## Make sure that the required sound modules are loaded
+##############################################################################
+modules=\`lsmod | awk '{print \$1}' | tr "_" "-"\`
+sndmodules="snd-seq snd-seq-dummy snd-pcm-oss snd-seq-oss snd-mixer-oss"
+
+for m in \$sndmodules ; do
+  loaded=\`echo \$modules | grep \$m\`
+  if [ -z "\${loaded}" ] ; then
+     echo "\${MAGENTA}  Load module \${m}\${NORMAL}"
+     modprobe \$m > /dev/null
+  else
+     echo "\${CYAN}  Module \${m} already loaded\${NORMAL}"
+  fi
+done
+
+##############################################################################
+## Here we walk thru the sound cards found
+## under /proc/asound and select a suitable default. Once a default selection
+## is made, this is assigned this as the default device. Unfortunately
+## Jack does not care about the defult setting in ALSA, so we have to
+## patch the jack resource file (~/.jackdrc)to select the default device explicitly.
+## More important than .jackdrc is the qjackctl config file so we update
+## that as well.
+##
+## The algorithm to select the default device could be something like:
+#      -  Look for firewire sound cards and pick the first one found
+#      -  Look for usb sound cards and pick the first one found
+#      -  Look for pci sound cards and pick the one with the lowest
+#         (bus, slot) number
+#  
+#  Make sure to disregard pure midi devices (connected MIDI keyboard) since
+#  the show up as "sound cards" under /proc/asound
+##############################################################################
+#
+# THIS SECTION DOES NOT WORK VERY WELL. SEE WHAT alsaconf is doing, it seems to work
+#
+# First we create a list card numbers for the cards that have PCM Playback
+# capabilities
+#cards=\$(find /proc/asound -type d -name pcm*p | awk -F/ '{print \$4}' | sort | uniq | sed s/card//)
+# Right now we select the one of these that has the highest card number
+# (recall the list is sorted in order for uniq to work properly)
+#for c in \$cards ; do
+#  card="\$c"
+#done 
+#
+#if [ -n "\$card" ] ; then
+#  echo "\${GREEN}  Default Sound card : hw:\${card} \$(cat /proc/asound/card\${card}/id)\${NORMAL}"
+#  echo "pcm.!default { type hw; card \${card}; }" > /etc/asound.conf
+#  echo "ctl.!default { type hw; card \${card}; }" >> /etc/asound.conf
+#  if [ -f "/home/tc/.jackdrc" ] ; then
+#    sed -i "s/-dhw:[0-9,]*/-dhw:\${card}/" /home/tc/.jackdrc
+#    
+#  else
+#    echo "/usr/local/bin/jackd -R -dalsa hw:\${card} -r48000 -p1024 -n2" > /home/tc/.jackdrc
+#    chmod a+w /home/tc/.jackdrc
+#  fi
+#  mkdir -p /home/tc/.config/rncbc.org
+#  if [ -f "/home/tc/.config/rncbc.org/QjackCtl.conf" ] ; then
+#    sed -i "s/^Interface=.*/Interface=hw:\${card}/" /home/tc/.config/rncbc.org/QjackCtl.conf    
+#  else
+#    echo "[Settings]" > /home/tc/.config/rncbc.org/QjackCtl.conf
+#    echo "Interface=hw:\${card}" >> /home/tc/.config/rncbc.org/QjackCtl.conf
+#    chmod a+w /home/tc/.config/rncbc.org/QjackCtl.conf
+#  fi
+#else
+#  echo "\${RED}  No Sound card with PCM Playback capabilities found.\${NORMAL}"
+#fi
+##############################################################################
+## Setup the selected sound card to have reasonable volume settings
+##############################################################################
+echo "\${YELLOW}  Setup ALSA mixer\${NORMAL}"
+setup_mixer
+##############################################################################
+
+EOF
+
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+}
+  
+tcbuild_postinstall()
+{
+ echo "No postinstall defined."
+}
+
+ 

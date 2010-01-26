@@ -1,0 +1,19 @@
+PACKAGE="mxml"
+VERSION="2.6"
+DOWNLOAD_PATH="http://ftp.easysw.com/pub/${PACKAGE}/${VERSION}/"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Mini XML"
+SITE="http://www.minixml.org/"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/15 Initial Version"
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DSTROOT="${BIN_BASE}/${PACKAGE}/root"
+}

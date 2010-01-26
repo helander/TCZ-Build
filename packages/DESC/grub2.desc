@@ -1,0 +1,13 @@
+PACKAGE="grub2"
+VERSION="1.96"
+DOWNLOAD_PATH="ftp://alpha.gnu.org/gnu/grub/"
+SRC_FILE="grub-${VERSION}.tar.gz"
+SRC_DIR="grub-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Grub2 bootloader"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/04 Initial Version"
+

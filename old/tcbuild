@@ -1,0 +1,86 @@
+#!/bin/sh
+
+if [ -z "$2" ]; then
+  echo "usage: $0 package mode"
+  echo "modes are:"
+  echo `grep '^[a-z]*)' $0 | tr -d ')'` | fold -s
+  exit
+fi
+
+TCBUILD_DIR="/mnt/hda2/DROPBOX/Dropbox/BUILD"
+
+DESCFILE="$1"
+WITHEXT=`echo $1 | grep '.desc'`
+[ -z "$WITHEXT" ] && DESCFILE="${DESCFILE}.desc"
+
+if [ ! -f "${TCBUILD_DIR}/${DESCFILE}" ]; then
+  echo "File $DESCFILE not found."
+  exit
+fi
+. ${TCBUILD_DIR}/base.inc
+. ${TCBUILD_DIR}/$DESCFILE
+shift
+
+case $1 in
+clean)
+  tcbuild_clean
+;;
+download)
+  tcbuild_download
+;;
+unpack)
+  tcbuild_unpack
+;;
+configure)
+  tcbuild_configure
+;;
+compile)
+  tcbuild_compile
+;;
+install)
+  tcbuild_install
+##  tcbuild_desktop
+##  tcbuild_postinstall
+;;
+postinstall)
+  tcbuild_postinstall
+;;
+package)
+  tcbuild_package
+;;
+packages)
+  tcbuild_packages
+;;
+export)
+  tcbuild_export
+;;
+ls)
+  tcbuild_ls
+;;
+full)
+  set -e
+  echo "Time to Clean"
+  tcbuild_clean
+  echo "Time to Download"
+  tcbuild_download
+  echo "Time to Unpack"
+  tcbuild_unpack
+  echo "Time to Configure"
+  tcbuild_configure
+  echo "Time to Compile"
+  tcbuild_compile
+  echo "Time to Install"
+  tcbuild_install
+  echo "Time to Create desktop items"
+#  tcbuild_desktop
+  echo "Time to Postinstall"
+  tcbuild_postinstall
+  echo "Time to Package"
+  tcbuild_packages
+  echo "Time to Export"
+  tcbuild_export
+;;
+*)
+  echo Unknown action : $1
+esac
+

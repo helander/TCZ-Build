@@ -1,0 +1,51 @@
+PACKAGE="zynadd"
+VERSION="git"
+SRC_DIR="zyn"
+AUTHOR=""
+DESCRIPTION="zynadd"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/27 Initial Version"
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+export LV2_PATH="/usr/local/lib/lv2"
+
+tcbuild_download()
+{
+  echo "No download. Unpack will get stuff via git."
+}
+
+tcbuild_unpack()
+{
+  rm -fr ${SRC_BASE}/${PACKAGE}
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  git clone git://repo.or.cz/zyn.git
+  cd zyn
+
+}
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf  configure
+}
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf build
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  
+  root="${BIN_BASE}/${PACKAGE}/root"
+  export LV2_PATH="$root/usr/local/lib/lv2"
+
+  ./waf install
+}

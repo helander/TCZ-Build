@@ -1,0 +1,39 @@
+PACKAGE="lash"
+VERSION="0.6.0"
+DOWNLOAD_PATH="http://download.savannah.gnu.org/releases/lash"
+SRC_FILE="${PACKAGE}-${VERSION}~rc2.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}.594"
+DESCRIPTION="LASH"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/25 Initial Version"
+#BUILDDEPS=""
+#DEPS=""
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f icons/${PACKAGE}_48px.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/${PACKAGE}_panel
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}"> /usr/local/bin/${PACKAGE}_panel</Program>
+</JWM>
+EOF
+
+
+}

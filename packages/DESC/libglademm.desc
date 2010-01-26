@@ -1,0 +1,21 @@
+PACKAGE="libglademm"
+VERSION="2.6.7"
+DOWNLOAD_PATH="http://ftp.acc.umu.se/pub/GNOME/sources/libglademm/2.6"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="libglademm"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/27 Initial Version"
+
+export CXXFLAGS="${CFLAGS}"
+
+#tcbuild_download()
+#{
+#  mkdir -p "${DOWNLOADS_DIR}"
+#  cd "${DOWNLOADS_DIR}"
+#  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/${SRC_FILE}/download"
+#}

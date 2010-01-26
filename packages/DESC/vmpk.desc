@@ -1,0 +1,50 @@
+PACKAGE="vmpk"
+VERSION="0.3.1"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/vmpk"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Pedro Lopez-Cabanillas"
+DESCRIPTION="Virtual MIDI Piano Keyboard"
+SITE="http://vmpk.sourceforge.net"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  cmake . -DCMAKE_INSTALL_PREFIX=/usr/local
+}
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f data/${PACKAGE}_32x32.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/${PACKAGE}
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">/usr/local/bin/${PACKAGE}</Program>
+</JWM>
+EOF
+
+
+}

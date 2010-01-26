@@ -1,0 +1,55 @@
+PACKAGE="qjackctl"
+VERSION="0.3.5"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/qjackctl"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Rui Nuno Capela"
+DESCRIPTION="Jack Control"
+SITE="http://qjackctl.sourceforge.net/"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  cp -f icons/${PACKAGE}.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/${PACKAGE}
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">/usr/local/bin/${PACKAGE}</Program>
+</JWM>
+EOF
+
+  mkdir -p "${root}/usr/local/tce.installed"
+
+  cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+#!/bin/sh
+modprobe snd-seq
+[ -f "/home/tc/.config/rncbc.org/QjackCtl.conf" ] && exit 0
+[ -d "/home/tc/.config" ] || mkdir /home/tc/.config
+chown tc:staff /home/tc/.config
+[ -d "/home/tc/.config/rncbc.org" ] || mkdir /home/tc/.config/rncbc.org
+chown tc:staff /home/tc/.config/rncbc.org
+echo "[Settings]" > /home/tc/.config/rncbc.org/QjackCtl.conf
+echo "Server=jackd" >> /home/tc/.config/rncbc.org/QjackCtl.conf
+echo "Priority=70" >> /home/tc/.config/rncbc.org/QjackCtl.conf
+chown tc:staff /home/tc/.config/rncbc.org/QjackCtl.conf
+EOF
+
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+}

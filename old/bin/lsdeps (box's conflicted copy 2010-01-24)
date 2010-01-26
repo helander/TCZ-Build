@@ -1,0 +1,33 @@
+#!/bin/sh
+packagefile=$1
+verbose=$2
+package=`basename $packagefile`
+repo="/mnt/hda1/REPO/tcz/"
+content=`mktemp -t -d`
+sudo mount $packagefile $content -t squashfs -o loop,ro,bs=4096
+files=`find $content`
+lsdeps=`mktemp -t`
+for f in $files; do
+  ldd $f 2>/dev/null | \
+    grep -e "=> /usr/local" -e "=> not found" | \
+    awk '{print $1}' >> $lsdeps  
+done
+fdeps=`sort -u $lsdeps`
+rm -f $lsdeps
+for f in $fdeps; do
+ [ -n "$verbose" ] && echo $f "----->"
+ deps=`grep -l $f $repo/*.tcz.list`
+ many=""
+ for d in $deps; do
+   bd=`basename $d | sed "s/.tcz.list/.tcz/"`
+   if [ "$bd" != "$package" ]; then
+      [ -n "$verbose" ] && echo "  " $bd
+     echo "$bd" >> $lsdeps
+   fi
+   [ -n "$many" ] && [ -n "$verbose" ] && echo "WARNING!!!!!!!!! $f is found in multiple extensions !!!!!WARNING"
+   many="yes"
+ done
+done
+if [ -f $lsdeps ]; then
+  sort -u $lsdeps 
+fi

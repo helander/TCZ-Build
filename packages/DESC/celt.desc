@@ -1,0 +1,14 @@
+PACKAGE="celt"
+VERSION="0.7.0"
+DOWNLOAD_PATH="http://downloads.xiph.org/releases/celt"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+#CONFIGURE_OPTIONS="--prefix=/usr/local --dbus"
+
+AUTHOR="Jean-Marc Valin"
+DESCRIPTION="Ultra-low delay audio codec"
+SITE="http://www.celt-codec.org/"
+COPYING="BSD"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+

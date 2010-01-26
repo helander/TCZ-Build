@@ -1,0 +1,35 @@
+PACKAGE="lv2core"
+VERSION="3.0"
+DOWNLOAD_PATH="http://lv2plug.in/spec"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="LV2 Audio Plugin Standard"
+SITE="http://lv2plug.in"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --prefix=/usr/local configure 
+}
+
+tcbuild_compile()
+{
+#  JOBS="`grep ^processor /proc/cpuinfo | wc -l`"
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+#  make -j"${JOBS}"
+  ./waf build
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --destdir="${BIN_BASE}/${PACKAGE}/root" install
+
+
+}
+

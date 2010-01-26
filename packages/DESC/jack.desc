@@ -1,0 +1,52 @@
+PACKAGE="jack"
+VERSION="1.9.4"
+DOWNLOAD_PATH="http://www.grame.fr/~letz"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.bz2"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Stephane Letz"
+DESCRIPTION="Jack Audio Connection Kit - Jack2"
+SITE="http://www.grame.fr/~letz"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+DEPS="alsa.tcz"
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --prefix=/usr/local  configure 
+}
+
+tcbuild_compile()
+{
+#  JOBS="`grep ^processor /proc/cpuinfo | wc -l`"
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+#  make -j"${JOBS}"
+  ./waf build
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --destdir="${BIN_BASE}/${PACKAGE}/root" install
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+#  mkdir -p "${root}/usr/local/tce.installed"
+
+
+  mkdir -p "${root}/usr/local/tce.installed"
+  cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+#!/bin/sh
+modprobe snd-seq
+EOF
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+
+}
+

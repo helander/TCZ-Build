@@ -1,0 +1,30 @@
+PACKAGE="dssi-vst"
+VERSION="0.8"
+DOWNLOAD_PATH="http://downloads.sourceforge.net/dssi"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Various"
+DESCRIPTION="Win32 VST:s (instruments and effects) as DSSI plugins"
+SITE="http://breakfastquay.com/dssi-vst/"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+tcbuild_configure()
+{
+  echo "No configure required."
+}
+
+tcbuild_install()
+{
+
+  dssidir="${BIN_BASE}/${PACKAGE}/root/usr/local/lib/dssi"  
+  ladspadir="${BIN_BASE}/${PACKAGE}/root/usr/local/lib/ladspa"  
+  bindir="${BIN_BASE}/${PACKAGE}/root/usr/local/bin"  
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DSSIDIR="$dssidir" LADSPADIR="$ladspadir" BINDIR="$bindir" 
+
+###  mkdir -p ${BIN_BASE}/${PACKAGE}/root/usr/local/include
+###  cp ${SRC_BASE}/${PACKAGE}/${SRC_DIR}/vestige/* ${BIN_BASE}/${PACKAGE}/root/usr/local/include
+}

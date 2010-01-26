@@ -1,0 +1,39 @@
+PACKAGE="libfftw3l"
+VERSION="3.2.1"
+DOWNLOAD_PATH="http://www.fftw.org"
+SRC_FILE="fftw-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR="Matteo Frigo and Steven G. Johnson"
+DESCRIPTION="Fast Fourier Transform routines - long-double precision version"
+SITE="http://www.fftw.org/"
+COPYING="GPL"
+MAINTAINER="helander"
+COMMENTS=""
+CHANGELOG="2010/01/15 Initial Version"
+
+
+tcbuild_unpack()
+{
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  case ${SRC_FILE} in
+  *.tar.gz|*.tgz)
+    tar zxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.tar.bz2|*.tbz2)
+    tar jxvf "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  *.zip)
+    unzip "${DOWNLOADS_DIR}/${SRC_FILE}"
+  ;;
+  esac
+  mv "fftw-${VERSION}" $SRC_DIR
+}
+
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./configure --prefix=/usr/local --enable-shared --disable-static --enable-threads --enable-long-double
+}

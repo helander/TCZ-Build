@@ -1,0 +1,67 @@
+PACKAGE="ladi-patchage"
+VERSION="git"
+SRC_DIR="${PACKAGE}"
+AUTHOR=""
+DESCRIPTION="Patchage"
+SITE=""
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/27 Initial Version"
+
+export CXXFLAGS="${CFLAGS} -fexceptions -frtti"
+
+tcbuild_download()
+{
+  echo "No download. Unpack will get stuff via git."
+}
+
+tcbuild_unpack()
+{
+  rm -fr ${SRC_BASE}/${PACKAGE}
+  mkdir -p "${SRC_BASE}/${PACKAGE}"
+  cd "${SRC_BASE}/${PACKAGE}"
+  git clone git://repo.or.cz/ladi-patchage.git
+  cd ladi-patchage
+  git checkout --track -b ladi origin/ladi
+
+}
+
+
+tcbuild_configure()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --prefix=/usr/local configure
+}
+
+tcbuild_compile()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf build
+}
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  ./waf --destdir="${BIN_BASE}/${PACKAGE}/root" install
+
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.icons"
+  mkdir -p "${root}/usr/local/tce.menu"
+  mkdir -p "${root}/usr/local/tce.installed"
+  cp -f icons/32x32/patchage.png "${root}/usr/local/tce.icons/${PACKAGE}.png"
+  
+  cat <<EOF >"${root}/usr/local/tce.icons/${PACKAGE}"
+i: /usr/local/tce.icons/${PACKAGE}.png
+t: ${PACKAGE}
+c: /usr/local/bin/lpatchage
+EOF
+
+  cat <<EOF >"${root}/usr/local/tce.menu/${PACKAGE}"
+<JWM>
+<Program label="${PACKAGE}">/usr/local/bin/lpatchage</Program>
+</JWM>
+EOF
+
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+packages=`cat $1`
+for p in $packages; do
+  ./tcbuild DESC/$p.desc full >&  $p.log
+done

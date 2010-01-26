@@ -1,0 +1,43 @@
+PACKAGE="bristol"
+VERSION="0.40.5"
+DOWNLOAD_PATH="http://sourceforge.net/projects/bristol/files/bristol"
+#DOWNLOAD_PATH="http://bristol.sf.net/files"
+SRC_FILE="${PACKAGE}-${VERSION}.tar.gz"
+SRC_DIR="${PACKAGE}-${VERSION}"
+AUTHOR=""
+DESCRIPTION="Emulation of various instruments"
+SITE="http://sourceforge.net/projects/bristol"
+COPYING="GPL"
+MAINTAINER="lehswe@gmail.com"
+COMMENTS=""
+CHANGELOG="2009/07/14 Initial Version"
+
+
+tcbuild_download()
+{
+  mkdir -p "${DOWNLOADS_DIR}"
+  cd "${DOWNLOADS_DIR}"
+#  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/${SRC_FILE}/download"
+  [ -f "${SRC_FILE}" ] || wget "${DOWNLOAD_PATH}/${SRC_FILE}"
+
+}
+
+
+
+tcbuild_install()
+{
+  cd "${SRC_BASE}/${PACKAGE}/${SRC_DIR}"
+  make install DESTDIR="${BIN_BASE}/${PACKAGE}/root"
+
+  root="${BIN_BASE}/${PACKAGE}/root"
+  mkdir -p "${root}/usr/local/tce.installed"
+
+  cat <<EOF >"${root}/usr/local/tce.installed/${PACKAGE}"
+#!/bin/sh
+sed -i -e "s/bristol -rate/set_rlimits bristol -rate/g" /usr/local/bin/startBristol
+EOF
+
+  sudo chown root:staff ${root}/usr/local/tce.installed/${PACKAGE}
+  sudo chmod 775 ${root}/usr/local/tce.installed/${PACKAGE}
+
+}

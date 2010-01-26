@@ -1,0 +1,10 @@
+#!/bin/sh
+packages=`cat $1`
+for p in $packages; do
+  ./tcbuild DESC/$p.desc clean
+  ./tcbuild DESC/$p.desc download
+  ./tcbuild DESC/$p.desc unpack
+done
+for p in $packages; do
+  ./tcbuild DESC/$p.desc configure >&  $p.log
+done
