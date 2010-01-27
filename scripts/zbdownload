@@ -1,0 +1,37 @@
+#!bin/sh
+package=$1
+if [ -z "$package" ]; then
+  echo "No package name specified."
+  exit
+fi
+
+[ "$TCZBUILD_ROOT" ] || TCZBUILD_ROOT=/local/tczbuild
+if [ ! -d $TCZBUILD_ROOT ]; then
+  echo "Non existing root directory ($TCZBUILD_ROOT)."
+  exit
+fi
+
+PACKAGE_DIR=$TCZBUILD_ROOT/packages/$package
+if [ ! -d $PACKAGE_DIR ]; then
+  echo "Non existing package directory ($PACKAGE_DIR)."
+  exit
+fi
+
+
+if [ -f $PACKAGE_DIR/properties ]; then
+. $PACKAGE_DIR/properties
+else
+  echo "Non existing properties file ($PACKAGE_DIR/properties)."
+  exit
+fi
+
+DOWNLOADS_DIR=$TCZBUILD/downloads
+BUILDS_DIR=$TCZBUILD_ROOT/builds/$package
+[ -d $BUILDS_DIR ] || mkdir -p $BUILDS_DIR
+[ -d $DOWNLOADS_DIR ] || mkdir -p $DOWNLOADS_DIR
+
+SRC_FILE=$DOWNLOADS_DIR/$PACKAGE-$VERSION.$SRC_FILE_TYPE
+
+[ -f $PACKAGE_DIR/download ] && . $PACKAGE_DIR/download
+
+echo "Download for package $package done."
